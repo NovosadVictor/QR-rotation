@@ -5,12 +5,16 @@
 
 
 // Set vector of sins
-void set_vector(int n, int k, double *matrix) {
+void set_vector(int n, int k, double *matrix, double *d1, double *d2) {
     matrix[k * n + k - 1] *= matrix[k * n + k - 1];
     for (int i = k + 1; i < n; i++) {
+        double x = matrix[k * n + k - 1];
         matrix[k * n + k - 1] += matrix[i * n + k - 1] * matrix[i * n + k - 1];
-        double angle = matrix[i * n + k - 1] / sqrt(matrix[k * n + k - 1]);
-        matrix[i * n + k - 1] = (-1) * angle;
+        double sin = matrix[i * n + k - 1] / sqrt(matrix[k * n + k - 1]);
+        double cos = sqrt(x) / sqrt(matrix[k * n + k - 1]);
+        matrix[i * n + k - 1] = 0.0;
+        d1[i - k - 1] = -sin;
+        d2[i - k - 1] = cos;
     }
 
     matrix[k * n + k - 1] = sqrt(matrix[k * n + k - 1]);
@@ -18,18 +22,17 @@ void set_vector(int n, int k, double *matrix) {
 
 
 // Matrix to almost triangle matrix
-void to_almost_triangle(int n, double *matrix) {
+void to_almost_triangle(int n, double *matrix, double*d1, double *d2) {
     if (n == 2)
         return;
     for (int k = 1; k < n - 1; k++) {
-        set_vector(n, k, matrix);
+        set_vector(n, k, matrix, d1, d2);
         for (int i = k + 1; i < n; i++) {
             for (int j = k; j < n; j++) {
                 double matrix_k = matrix[k * n + j];
                 double matrix_i = matrix[i * n + j];
-                double cos = sqrt(1 - (matrix[i * n + (k - 1)] * matrix[i * n + (k - 1)]));
-                matrix[k * n + j] = matrix_k * cos - matrix_i * matrix[i * n + (k - 1)];
-                matrix[i * n + j] = matrix_k * matrix[i * n + (k - 1)] + matrix_i * cos;
+                matrix[k * n + j] = matrix_k * d2[i - k - 1] - matrix_i * d1[i - k - 1];
+                matrix[i * n + j] = matrix_k * d1[i - k - 1] + matrix_i * d2[i - k - 1];
             }
 /*            for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++)
@@ -43,9 +46,8 @@ void to_almost_triangle(int n, double *matrix) {
             for (int i = k; i < n; i++) {
                 double matrix_k = matrix[i * n + k];
                 double matrix_i = matrix[i * n + l];
-                double cos = sqrt(1 - (matrix[l * n + (k - 1)] * matrix[l * n + (k - 1)]));
-                matrix[i * n + k] = matrix_k * cos + matrix_i * matrix[l * n + (k - 1)];
-                matrix[i * n + l] = matrix_i * cos - matrix_k * matrix[l * n + (k - 1)];
+                matrix[i * n + k] = matrix_k * d2[l - k - 1] - matrix_i * d1[l - k - 1];
+                matrix[i * n + l] = matrix_i * d2[l - k - 1] + matrix_k * d1[l - k - 1];
             }
 /*            for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++)
@@ -65,29 +67,45 @@ void to_almost_triangle(int n, double *matrix) {
 
 
 //QR for almost triangle matrix
-void qr(int n, double *matrix) {
+void qr(int n, double *matrix, double *d1, double *d2) {
     for (int k = 1; k < n; k++) {
+        double x = matrix[(k - 1) * n + k - 1];
         matrix[(k - 1) * n + k - 1] *= matrix[(k - 1) * n + k - 1];
         matrix[(k - 1) * n + k - 1] += matrix[k * n + k - 1] * matrix[k * n + k - 1];
-        double angle = matrix[k * n + k - 1] / sqrt(matrix[(k - 1) * n + k - 1]);
-        matrix[k * n + k - 1] = (-1) * angle;
+        double sin = matrix[k * n + k - 1] / sqrt(matrix[(k - 1) * n + k - 1]);
+        double cos = x / sqrt(matrix[(k - 1) * n + k - 1]);
+        d1[k - 1] = -sin;
+        d2[k - 1] = cos;
+        matrix[(k - 1) * n + k - 1] = sqrt(matrix[(k - 1) * n + k - 1]);
+        matrix[k * n + k - 1] = 0.0;
     }
-
-    matrix[(k - 1) * n + k - 1] = sqrt(matrix[(k - 1) * n + k - 1]);
 }
 
 
 // From QR to RQ
-void set_rq(int n, double *matrix) {
-/*!!!!    for (int l = k + 1; l < n; l++) {
-        for (int i = k; i < n; i++) {
-            double matrix_k = matrix[i * n + k];
-            double matrix_i = matrix[i * n + l];
-            double cos = sqrt(1 - (matrix[l * n + (k - 1)] * matrix[l * n + (k - 1)]));
-            matrix[i * n + k] = matrix_k * cos + matrix_i * matrix[l * n + (k - 1)];
-            matrix[i * n + l] = matrix_i * cos - matrix_k * matrix[l * n + (k - 1)];
+void set_rq(int n, double *matrix, double *d1, double *d2) {
+    for (int k = 0; k < n - 1; k++)
+            for (int i = 0; i < n; i++) {
+                double matrix_k = matrix[i * n + k];
+                double matrix_i = matrix[i * n + k + 1];
+                matrix[i * n + k] = matrix_k * d2[k] + matrix_i * d1[k];
+                matrix[i * n + k + 1] = matrix_i * d2[k] + matrix_k * d1[k];
         }
-*/ // Need FIX!!!!!
+}
+
+
+// Finding eigenvalues
+void eigenvalues(int n, double *matrix, double *d1, double *d2) {
+    // !!!!NEED FIX!!!!
+    for (int s = 0; s < 100; s++) {
+        to_almost_triangle(n, matrix, d1, d2);
+        qr(n, matrix, d1, d2);
+        set_rq(n, matrix, d1, d2);
+    }
+
+    for (int i = 0; i < n - 1; i++)
+        d1[i] = matrix[i * n + i];
+    d2[0] = matrix[(n - 1) * n + (n - 1)];
 }
 
 

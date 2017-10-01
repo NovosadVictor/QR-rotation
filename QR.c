@@ -27,9 +27,8 @@ int main(int argc, char **argv) {
         }
 
         double *matrix = (double *) malloc(n * n * sizeof(double));
-        double *matrix_for_norma = (double *) malloc(n * n * sizeof(double));
-        double *result = (double *) malloc(n * n * sizeof(double));
-        double *d = (double *) malloc(n * sizeof(double));
+        double *d1 = (double *) malloc((n - 1) * sizeof(double));
+        double *d2 = (double *) malloc((n - 1) * sizeof(double));
 
         for (int i = 0; i < n; i++)
             for (int j = 0; j < n; j++) {
@@ -39,7 +38,6 @@ int main(int argc, char **argv) {
                     return -1;
                 }
                 matrix[i * n + j] = elem;
-                matrix_for_norma[i * n + j] = matrix[i * n + j];
             }
         char c;
         if (fscanf(fi, "%c", &c) > 0) {
@@ -47,74 +45,55 @@ int main(int argc, char **argv) {
             return -1;
         }
 
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++) {
-                if (i == j)
-                    result[i * n + j] = 1.0;
-                else
-                    result[i * n + j] = 0.0;
-            }
-
         printf("Input matrix\n");
         print(matrix, n);
 
         time_t start = clock();
 
-        QR(n, matrix);
+        eigenvalues(n, matrix, d1, d2);
 
         time_t end = clock();
 
-        printf("Resulting matrix\n");
-        print(matrix, n);
+        printf("Result:\n\tEigenvalues:\n");
+        for (int i = 0; i < n - 1; i++)
+            printf("%lf, ", d1[i]);
+        printf("%lf\n", d2[0]);
 
         printf("execution time: %f sec\n", (double) (end - start) / CLOCKS_PER_SEC);
         free(matrix);
-        free(result);
-        free(d);
-        free(matrix_for_norma);
+        free(d1);
+        free(d2);
         fclose(fi);
     }
     if (atoi(argv[1]) == 1) {
         int n = atoi(argv[2]);
 
         double *matrix = (double *) malloc(n * n * sizeof(double));
-        double *matrix_for_norma = (double *) malloc(n * n * sizeof(double));
-        double *result = (double *) malloc(n * n * sizeof(double));
-        double *d = (double *) malloc(n * sizeof(double));
+        double *d1 = (double *) malloc((n - 1) * sizeof(double));
+        double *d2 = (double *) malloc((n - 1) * sizeof(double));
 
         for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++) {
+            for (int j = 0; j < n; j++)
                 matrix[i * n + j] = formula(i, j, n);
-                matrix_for_norma[i * n + j] = matrix[i * n + j];
-            }
-
-
-
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++) {
-                if (i == j)
-                    result[i * n + j] = 1.0;
-                else
-                    result[i * n + j] = 0.0;
-            }
 
         printf("Input matrix\n");
         print(matrix, n);
 
         time_t start = clock();
 
-        QR(n, matrix);
+        eigenvalues(n, matrix, d1, d2);
 
         time_t end = clock();
 
-        printf("Resulting matrix\n");
-        print(matrix, n);
+        printf("Result:\n\tEigenvalues:\n");
+        for (int i = 0; i < n - 1; i++)
+            printf("%lf, ", d1[i]);
+        printf("%lf\n", d2[0]);
 
         printf("execution time: %f sec\n", (double) (end - start) / CLOCKS_PER_SEC);
         free(matrix);
-        free(result);
-        free(d);
-        free(matrix_for_norma);
+        free(d1);
+        free(d2);
     }
     return 0;
 }

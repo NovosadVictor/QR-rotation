@@ -133,11 +133,17 @@ void set_rq(int n, double *matrix, double *d1, double *d2) {
 
 // Finding eigenvalues
 void eigenvalues(int n, double *matrix, double *d1, double *d2) {
-    // !!!!NEED FIX!!!!
-    for (int s = 0; s < 20; s++) {
+    double sum = 0;
+    for (int i = 1; i < n; i++)
+        for (int j = 0; j < i; j++)
+            sum += matrix[i * n + j] * matrix[i * n + j];
+    int s = 0;
+    while(sum > exp(-30)) {
+        s++;
         to_almost_triangle(n, matrix, d1, d2);
         qr(n, matrix, d1, d2);
         set_rq(n, matrix, d1, d2);
+
         printf("RQ iteration %d\n", s);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++)
@@ -145,6 +151,11 @@ void eigenvalues(int n, double *matrix, double *d1, double *d2) {
             printf("\n");
         }
         printf("\n");
+
+        sum = 0;
+        for (int i = 1; i < n; i++)
+            for (int j = 0; j < i; j++)
+                sum += matrix[i * n + j] * matrix[i * n + j];
     }
 
     for (int i = 0; i < n - 1; i++)

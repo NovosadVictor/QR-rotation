@@ -18,7 +18,7 @@ void set_vector(int n, int k, double *matrix, double *d1, double *d2) {
         }
         double sin = matrix[i * n + k - 1] / sqrt(matrix[k * n + k - 1]);
         double cos = sqrt(x) / sqrt(matrix[k * n + k - 1]);
-        printf("\nk = %d, cos = %lf, sin = %lf\n", k, cos, sin);
+//        printf("\nk = %d, cos = %lf, sin = %lf\n", k, cos, sin);
         matrix[i * n + k - 1] = 0.0;
         d1[i - k - 1] = -sin;
         d2[i - k - 1] = cos;
@@ -38,20 +38,20 @@ void to_almost_triangle(int n, double *matrix, double*d1, double *d2) {
             for (int j = k; j < n; j++) {
                 double matrix_k = matrix[k * n + j];
                 double matrix_i = matrix[i * n + j];
-                printf("%lf , %lf, cos = %lf, sin = %lf\n",
-                       matrix[k * n + j], matrix[i * n + j], d2[i - k - 1], d1[i - k - 1]);
+//                printf("%lf , %lf, cos = %lf, sin = %lf\n",
+//                       matrix[k * n + j], matrix[i * n + j], d2[i - k - 1], d1[i - k - 1]);
                 matrix[k * n + j] = matrix_k * d2[i - k - 1] - matrix_i * d1[i - k - 1];
                 matrix[i * n + j] = matrix_k * d1[i - k - 1] + matrix_i * d2[i - k - 1];
-                printf("matrix k, i %lf , %lf\n", matrix[k * n + j], matrix[i * n + j]);
+//                printf("matrix k, i %lf , %lf\n", matrix[k * n + j], matrix[i * n + j]);
             }
-            printf("\nmatrix after mult left, k = %d\n", k);
+/*            printf("\nmatrix after mult left, k = %d\n", k);
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++)
                     printf("%lf ", matrix[i * n + j]);
                 printf("\n");
             }
             printf("\n");
-
+*/
         }
         for (int l = k + 1; l < n; l++) {
             for (int i = 0; i < n; i++) {
@@ -60,14 +60,14 @@ void to_almost_triangle(int n, double *matrix, double*d1, double *d2) {
                 matrix[i * n + k] = matrix_k * d2[l - k - 1] - matrix_i * d1[l - k - 1];
                 matrix[i * n + l] = matrix_i * d2[l - k - 1] + matrix_k * d1[l - k - 1];
             }
-            printf("\nmatrix after mult right, k = %d\n", k);
+/*            printf("\nmatrix after mult right, k = %d\n", k);
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++)
                     printf("%lf ", matrix[i * n + j]);
                 printf("\n");
             }
             printf("\n");
-
+*/
         }
     }
 }
@@ -75,13 +75,14 @@ void to_almost_triangle(int n, double *matrix, double*d1, double *d2) {
 
 //QR for almost triangle matrix
 void qr(int n, double *matrix, double *d1, double *d2) {
-    printf("before QR matrix\n");
+/*    printf("before QR matrix\n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++)
             printf("%lf ", matrix[i * n + j]);
         printf("\n");
     }
     printf("\n");
+*/
     for (int k = 1; k < n; k++) {
         double x = matrix[(k - 1) * n + k - 1];
         if (fabs(x) < exp(-15) && fabs(matrix[k * n + k - 1]) < exp(-15)) {
@@ -89,15 +90,19 @@ void qr(int n, double *matrix, double *d1, double *d2) {
             d2[k - 1] = 1.0;
             continue;
         }
+
         matrix[(k - 1) * n + k - 1] *= matrix[(k - 1) * n + k - 1];
         matrix[(k - 1) * n + k - 1] += matrix[k * n + k - 1] * matrix[k * n + k - 1];
+
         double sin = matrix[k * n + k - 1] / sqrt(matrix[(k - 1) * n + k - 1]);
         double cos = x / sqrt(matrix[(k - 1) * n + k - 1]);
+
         d1[k - 1] = -sin;
         d2[k - 1] = cos;
 //        printf("qr k = %d, cos = %lf, sin = %lf\n", k, cos, sin);
         matrix[(k - 1) * n + k - 1] = sqrt(matrix[(k - 1) * n + k - 1]);
         matrix[k * n + k - 1] = 0.0;
+
         for (int j = k; j < n; j++) {
             double matrix_k = matrix[(k - 1) * n + j];
             double matrix_i = matrix[k * n + j];
@@ -110,14 +115,14 @@ void qr(int n, double *matrix, double *d1, double *d2) {
 
 // From QR to RQ
 void set_rq(int n, double *matrix, double *d1, double *d2) {
-    printf("QR matrix\n");
+/*    printf("QR matrix\n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++)
             printf("%lf ", matrix[i * n + j]);
         printf("\n");
     }
     printf("\n");
-
+*/
     for (int k = 0; k < n - 1; k++) {
         for (int i = 0; i < n; i++) {
             double matrix_k = matrix[i * n + k];
@@ -168,20 +173,6 @@ void eigenvalues(int n, double *matrix, double *d1, double *d2) {
         d1[i] = matrix[i * n + i];
     d2[0] = matrix[(n - 1) * n + (n - 1)];
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #endif // QR_FUNCTIONS_H

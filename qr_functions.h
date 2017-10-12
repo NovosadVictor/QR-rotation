@@ -74,7 +74,7 @@ void to_almost_triangle(int n, double *matrix, double*d1, double *d2) {
 
 
 //QR for almost triangle matrix
-void qr(int n, double *matrix, double *d1, double *d2) {
+void qr(int n, double *matrix, double *d1, double *d2, double *s_k) {
 /*    printf("before QR matrix\n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++)
@@ -83,6 +83,17 @@ void qr(int n, double *matrix, double *d1, double *d2) {
     }
     printf("\n");
 */
+
+    s_k[0] = matrix[(n - 1) * n + (n - 1)];
+
+    if (fabs(s_k[0]) < exp(-20))
+        s_k[0] = 1.0;
+
+    printf("s_k = %lf\n", s_k[0]);
+
+    for (int i = 0; i < n; i++)
+        matrix[i * n + i] -= s_k[0];
+
     for (int k = 1; k < n; k++) {
         double x = matrix[(k - 1) * n + k - 1];
         if (fabs(x) < exp(-15) && fabs(matrix[k * n + k - 1]) < exp(-15)) {
@@ -109,20 +120,21 @@ void qr(int n, double *matrix, double *d1, double *d2) {
             matrix[(k - 1) * n + j] = matrix_k * d2[k - 1] - matrix_i * d1[k - 1];
             matrix[k * n + j] = matrix_k * d1[k - 1] + matrix_i * d2[k - 1];
         }
+
     }
 }
 
 
 // From QR to RQ
-void set_rq(int n, double *matrix, double *d1, double *d2) {
-/*    printf("QR matrix\n");
+void set_rq(int n, double *matrix, double *d1, double *d2, double *s_k) {
+    printf("QR matrix\n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++)
             printf("%lf ", matrix[i * n + j]);
         printf("\n");
     }
     printf("\n");
-*/
+
     for (int k = 0; k < n - 1; k++) {
         for (int i = 0; i < n; i++) {
             double matrix_k = matrix[i * n + k];
@@ -139,21 +151,26 @@ void set_rq(int n, double *matrix, double *d1, double *d2) {
         printf("\n");
 */
     }
+
+    for (int i = 0; i < n; i++)
+        matrix[i * n + i] += s_k[0];
 }
 
 
 // Finding eigenvalues
-void eigenvalues(int n, double *matrix, double *d1, double *d2) {
-    double sum = 0;
+void eigenvalues(int n, double *matrix, double *d1, double *d2, double *s_k) {
+/*    double sum = 0;
     for (int i = 1; i < n; i++)
         for (int j = 0; j < i; j++)
             sum += matrix[i * n + j] * matrix[i * n + j];
+            */
+//    int actual_size = n;
     int s = 0;
-    while(sum > exp(-20)) {
+    while(n > 2) {
         s++;
         to_almost_triangle(n, matrix, d1, d2);
-        qr(n, matrix, d1, d2);
-        set_rq(n, matrix, d1, d2);
+        qr(n, matrix, d1, d2, s_k);
+        set_rq(n, matrix, d1, d2, s_k);
 
         printf("RQ iteration %d\n", s);
         for (int i = 0; i < n; i++) {
@@ -163,15 +180,41 @@ void eigenvalues(int n, double *matrix, double *d1, double *d2) {
         }
         printf("\n");
 
-        sum = 0;
+        if (fabs(matrix[(n - 1) * n + (n - 2)]) < exp(-20)) {
+            d1[n - 2] = matrix[(n - 1) * n + (n - 1)];
+            double *new_matr = (double *) malloc((n - 1) * (n - 1) * sizeof(double));
+            for (int i = 0; i < n - 1; i++)
+                for (int j = 0; j < n - 1; j++)
+                    new_matr[i * (n - 1) + j] = matrix[i * n + j];
+            free(matrix);
+            matrix = (double *) malloc((n - 1) * (n - 1) * sizeof(double));
+            for (int i = 0; i < n - 1; i++)
+                for (int j = 0; j < n - 1; j++)
+                    matrix[i * (n - 1) + j] = new_matr[i * (n - 1) + j];
+            free(new_matr);
+            n--;
+            continue;
+        }
+
+ /*       sum = 0;
         for (int i = 1; i < n; i++)
             for (int j = 0; j < i; j++)
                 sum += matrix[i * n + j] * matrix[i * n + j];
+                */
     }
 
-    for (int i = 0; i < n - 1; i++)
-        d1[i] = matrix[i * n + i];
-    d2[0] = matrix[(n - 1) * n + (n - 1)];
+    double trace = matrix[0] + matrix[3];
+    double det = matrix[0] * matrix[3] - matrix[1] * matrix[2];
+    double D = trace * trace - 4 * det;
+//    printf("tr = %lf, det = %lf, D = %lf\n", trace, det, D);
+
+    d1[0] = (trace + sqrt(D)) / 2;
+    d2[0] = (trace - sqrt(D)) / 2;
+
+//    for (int i = 0; i < n - 1; i++)
+//        d1[i] = matrix[i * n + i];
+//    d2[0] = matrix[(n - 1) * n + (n - 1)];
+    free(matrix);
 }
 
 

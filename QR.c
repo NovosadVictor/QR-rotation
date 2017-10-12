@@ -29,6 +29,7 @@ int main(int argc, char **argv) {
         double *matrix = (double *) malloc(n * n * sizeof(double));
         double *d1 = (double *) malloc((n - 1) * sizeof(double));
         double *d2 = (double *) malloc((n - 1) * sizeof(double));
+        double *s_k = (double *) malloc(sizeof(double));
 
         for (int i = 0; i < n; i++)
             for (int j = 0; j < n; j++) {
@@ -50,7 +51,7 @@ int main(int argc, char **argv) {
 
         time_t start = clock();
 
-        eigenvalues(n, matrix, d1, d2);
+        eigenvalues(n, matrix, d1, d2, s_k);
 
         time_t end = clock();
 
@@ -60,9 +61,10 @@ int main(int argc, char **argv) {
         printf("%lf\n", d2[0]);
 
         printf("execution time: %f sec\n", (double) (end - start) / CLOCKS_PER_SEC);
-        free(matrix);
+ //       free(matrix);
         free(d1);
         free(d2);
+        free(s_k);
         fclose(fi);
     }
     if (atoi(argv[1]) == 1) {
@@ -71,6 +73,7 @@ int main(int argc, char **argv) {
         double *matrix = (double *) malloc(n * n * sizeof(double));
         double *d1 = (double *) malloc((n - 1) * sizeof(double));
         double *d2 = (double *) malloc((n - 1) * sizeof(double));
+        double *s_k = (double *) malloc(sizeof(double));
 
         for (int i = 0; i < n; i++)
             for (int j = 0; j < n; j++)
@@ -81,7 +84,7 @@ int main(int argc, char **argv) {
 
         time_t start = clock();
 
-        eigenvalues(n, matrix, d1, d2);
+        eigenvalues(n, matrix, d1, d2, s_k);
 
         time_t end = clock();
 
@@ -91,9 +94,10 @@ int main(int argc, char **argv) {
         printf("%lf\n", d2[0]);
 
         printf("execution time: %f sec\n", (double) (end - start) / CLOCKS_PER_SEC);
-        free(matrix);
+//        free(matrix);
         free(d1);
         free(d2);
+        free(s_k);
     }
     return 0;
 }
